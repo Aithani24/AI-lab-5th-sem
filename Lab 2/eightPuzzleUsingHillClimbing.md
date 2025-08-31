@@ -43,114 +43,95 @@ The algorithm starts from an initial configuration and repeatedly moves to a nei
 #include <bits/stdc++.h>
 using namespace std;
 
-void print_board(const vector<vector<int>>& board) 
-{
-    for (auto &row : board) 
-    {
-        for (int x : row) cout << x << " ";
+void showBoard(const vector<vector<int>>& grid) {
+    for (auto &row : grid) {
+        for (int val : row) cout << val << " ";
         cout << "\n";
     }
 }
 
-bool isGoal(const vector<vector<int>>& puzzle, const vector<vector<int>>& goal) 
-{
-    return puzzle == goal;
+bool checkGoal(const vector<vector<int>>& state, const vector<vector<int>>& target) {
+    return state == target;
 }
 
-pair<int,int> findEmptyBox(const vector<vector<int>>& puzzle) 
-{
-    for(int i=0; i<3; i++)
-        for(int j=0; j<3; j++)
-            if(puzzle[i][j] == 0)
-                return {i,j};
+pair<int,int> locateBlank(const vector<vector<int>>& state) {
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++)
+            if (state[r][c] == 0) return {r, c};
     return {-1,-1};
 }
 
-int misplaced_tiles(const vector<vector<int>>& puzzle, const vector<vector<int>>& goal) 
-{
-    int count = 0;
-    for(int i=0; i<3; i++) 
-    {
-        for(int j=0; j<3; j++) 
-        {
-            if (puzzle[i][j] != 0 && puzzle[i][j] != goal[i][j])
-                count++;
-        }
-    }
-    return count;
+int heuristicMisplaced(const vector<vector<int>>& state, const vector<vector<int>>& target) {
+    int cnt = 0;
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++)
+            if (state[r][c] != 0 && state[r][c] != target[r][c]) cnt++;
+    return cnt;
 }
 
-vector<vector<vector<int>>> get_neighbors(const vector<vector<int>>& board) 
-{
-    vector<vector<vector<int>>> neighbors;
-    auto [x, y] = findEmptyBox(board);
-    vector<pair<int,int>> dirs = {{1,0},{-1,0},{0,1},{0,-1}};
+vector<vector<vector<int>>> expandNeighbors(const vector<vector<int>>& state) {
+    vector<vector<vector<int>>> result;
+    auto [br, bc] = locateBlank(state);
+    vector<pair<int,int>> moves = {{1,0},{-1,0},{0,1},{0,-1}};
 
-    for(auto [dx,dy] : dirs)
-    {
-        int nx = x + dx, ny = y + dy;
-        if(nx>=0 && ny>=0 && nx<3 && ny<3){
-            auto new_board = board;
-            swap(new_board[x][y], new_board[nx][ny]);
-            neighbors.push_back(new_board);
+    for (auto [dr, dc] : moves) {
+        int nr = br + dr, nc = bc + dc;
+        if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3) {
+            auto next = state;
+            swap(next[br][bc], next[nr][nc]);
+            result.push_back(next);
         }
     }
-    return neighbors;
+    return result;
 }
 
-bool hillClimbing(vector<vector<int>> start, vector<vector<int>> goal) 
-{
-    vector<vector<int>> current = start;
-    int current_h = misplaced_tiles(current, goal);
+bool hillClimb(vector<vector<int>> start, vector<vector<int>> target) {
+    auto current = start;
+    int h_curr = heuristicMisplaced(current, target);
 
-    cout << "Starting hill climbing...\n";
-    print_board(current);
-    cout << "Heuristic: " << current_h << "\n\n";
+    cout << "Hill climbing started...\n";
+    showBoard(current);
+    cout << "Heuristic: " << h_curr << "\n\n";
 
-    while (true) 
-    {
-        if (isGoal(current, goal)) {
-
-            cout << "Goal reached!\n";
+    while (true) {
+        if (checkGoal(current, target)) {
+            cout << "Reached the goal!\n";
             return true;
         }
 
-        auto neighbors = get_neighbors(current);
-        vector<vector<int>> best_neighbor = current;
-        int best_h = current_h;
+        auto nbrs = expandNeighbors(current);
+        auto best = current;
+        int h_best = h_curr;
 
-        for (auto &nb : neighbors) 
-        {
-            int h = misplaced_tiles(nb, goal);
-            if (h < best_h) 
-            {
-                best_h = h;
-                best_neighbor = nb;
+        for (auto &nb : nbrs) {
+            int h = heuristicMisplaced(nb, target);
+            if (h < h_best) {
+                h_best = h;
+                best = nb;
             }
         }
 
-        if (best_h >= current_h) 
-        {
-            cout << "No better neighbor found. Stopping.\n";
+        if (h_best >= h_curr) {
+            cout << "No better neighbor, stopping.\n";
             return false;
         }
 
-        current = best_neighbor;
-        current_h = best_h;
+        current = best;
+        h_curr = h_best;
 
-        print_board(current);
-        cout << "Heuristic: " << current_h << "\n\n";
+        showBoard(current);
+        cout << "Heuristic: " << h_curr << "\n\n";
     }
 }
 
-int main() 
-{
-    vector<vector<int>> puzzle = {{1, 2, 3}, {4, 5, 6}, {0, 7, 8}};
-    vector<vector<int>> goal = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
+int main() {
+    vector<vector<int>> start = {{1,2,3}, {4,5,6}, {0,7,8}};
+    vector<vector<int>> goal  = {{1,2,3}, {4,5,6}, {7,8,0}};
 
-    hillClimbing(puzzle, goal);
+    hillClimb(start, goal);
     return 0;
 }
+
 
 ```
 ---
