@@ -29,118 +29,99 @@ Each method ensures the magic constant  `M = n * n² + 1` is maintained.
 #include <bits/stdc++.h>
 using namespace std;
 
-vector<vector<int>> generateOdd(int n) 
-{
+void printSquare(const vector<vector<int>>& square) {
+    for (auto &row : square) {
+        for (auto &val : row) {
+            cout << setw(4) << val;
+        }
+        cout << "\n";
+    }
+}
+
+int magicConstant(int n) {
+    return n * (n * n + 1) / 2;
+}
+
+vector<vector<int>> oddMagic(int n) {
     vector<vector<int>> magic(n, vector<int>(n, 0));
     int i = 0, j = n / 2;
-
-    for (int num = 1; num <= n * n; ) 
-    {
+    for (int num = 1; num <= n * n; ) {
         magic[i][j] = num++;
         int newi = (i - 1 + n) % n;
         int newj = (j + 1) % n;
-        if (magic[newi][newj]) 
-        {
+        if (magic[newi][newj]) {
             i = (i + 1) % n;
-        } 
-        else 
-        {
+        } else {
             i = newi;
             j = newj;
         }
     }
-
     return magic;
 }
 
-vector<vector<int>> generateDoublyEven(int n) 
-{
+vector<vector<int>> doublyEvenMagic(int n) {
     vector<vector<int>> magic(n, vector<int>(n));
     int num = 1;
     for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
             magic[i][j] = num++;
-
-    for (int i = 0; i < n; i++) 
-    {
+    for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
-            if (((i % 4 == j % 4) || ((i % 4) + (j % 4) == 3))) 
-            {
+            if ((i % 4 == j % 4) || ((i % 4) + (j % 4) == 3)) {
                 magic[i][j] = (n * n + 1) - magic[i][j];
             }
         }
     }
-
     return magic;
 }
 
-vector<vector<int>> generateSinglyEven(int n) 
-{
-    int halfN = n / 2;
-    int subSquareSize = n / 2;
+vector<vector<int>> singlyEvenMagic(int n) {
+    int half = n / 2;
     int k = (n - 2) / 4;
-
-    vector<vector<int>> subSquare = generateOdd(halfN);
+    vector<vector<int>> sub = oddMagic(half);
     vector<vector<int>> magic(n, vector<int>(n));
-
-    for (int i = 0; i < halfN; i++) 
-    {
-        for (int j = 0; j < halfN; j++) 
-        {
-            magic[i][j] = subSquare[i][j];
-            magic[i + halfN][j] = subSquare[i][j] + 2 * halfN * halfN;
-            magic[i][j + halfN] = subSquare[i][j] + 3 * halfN * halfN;
-            magic[i + halfN][j + halfN] = subSquare[i][j] + halfN * halfN;
+    for (int i = 0; i < half; i++) {
+        for (int j = 0; j < half; j++) {
+            magic[i][j] = sub[i][j];
+            magic[i + half][j] = sub[i][j] + 2 * half * half;
+            magic[i][j + half] = sub[i][j] + 3 * half * half;
+            magic[i + half][j + half] = sub[i][j] + half * half;
         }
     }
-
-    for (int i = 0; i < halfN; i++) 
-    {
-        for (int j = 0; j < k; j++) 
-        {
-            swap(magic[i][j], magic[i + halfN][j]);
+    for (int i = 0; i < half; i++) {
+        for (int j = 0; j < k; j++) {
+            swap(magic[i][j], magic[i + half][j]);
         }
-        
-        for (int j = n - k + 1; j < n; j++) 
-        {
-            swap(magic[i][j], magic[i + halfN][j]);
+        for (int j = n - k + 1; j < n; j++) {
+            swap(magic[i][j], magic[i + half][j]);
         }
     }
-
-    swap(magic[k][0], magic[k + halfN][0]);
-    swap(magic[k][k], magic[k + halfN][k]);
-
+    swap(magic[k][0], magic[k + half][0]);
+    swap(magic[k][k], magic[k + half][k]);
     return magic;
 }
 
 int main() {
     int n;
-    cout << "Enter n (n >= 3, n != 2): ";
+    cout << "Enter n (>=3, !=2): ";
     cin >> n;
-
     if (n < 3 || n == 2) {
-        cout << "Magic square not possible for this n." << endl;
+        cout << "Magic square not possible\n";
         return 0;
     }
-
     vector<vector<int>> magic;
-
     if (n % 2 == 1)
-        magic = generateOdd(n);
+        magic = oddMagic(n);
     else if (n % 4 == 0)
-        magic = generateDoublyEven(n);
+        magic = doublyEvenMagic(n);
     else
-        magic = generateSinglyEven(n);
-
-    cout << "Magic Square of size " << n << ":\n";
-    for (auto &row : magic) {
-        for (auto &val : row)
-            cout << setw(4) << val;
-        cout << endl;
-    }
-
-    cout << "\nMagic constant: " << n * (n * n + 1) / 2 << endl;
+        magic = singlyEvenMagic(n);
+    cout << "\nMagic Square of size " << n << ":\n";
+    printSquare(magic);
+    cout << "\nMagic constant: " << magicConstant(n) << "\n";
+    return 0;
 }
+
 ```
 ---
 
