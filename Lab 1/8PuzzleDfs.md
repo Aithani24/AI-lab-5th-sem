@@ -1,3 +1,36 @@
+# 8-Puzzle Solver using DFS
+
+## Problem Statement
+
+Implement a program that solves the 8-puzzle problem using **Depth First Search (DFS)**.  
+The puzzle consists of a 3x3 grid with tiles numbered from 1 to 8 and one empty space (0).  
+The goal is to move the tiles to reach the goal state.
+
+---
+
+## Approach
+
+- Use a **stack** for DFS traversal.
+- At each state:
+  - Locate the blank (0) tile.
+  - Generate all valid moves (up, down, left, right).
+  - Push each new state onto the stack if it hasn’t been visited.
+- Continue until the goal state is reached or all states are exhausted.
+
+---
+
+## Implementation Details
+
+- The puzzle state is stored as a `vector<vector<int>>`.
+- We use a `set` to track visited states to avoid cycles.
+- Each move swaps the blank tile with one of its neighbors.
+- The `dfs()` function performs the core search logic.
+
+---
+
+## Code
+
+```cpp
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -73,3 +106,25 @@ int main() {
 
     return 0;
 }
+
+```
+---
+
+## Time and Space Complexity
+
+### Time Complexity:
+- **Worst-case:** O((9!)²)  
+  - Each state can lead to up to 4 moves.
+  - Total possible states = 9! = 362,880.
+  - In DFS, due to recursion and lack of optimal pruning, worst-case exploration can be exponential.
+
+### Space Complexity:
+- O(9!) for the visited set.
+- O(H) for recursion stack in the worst-case path depth H (up to 9 levels deep).
+
+---
+
+## Use Cases
+- Useful for understanding how uninformed search algorithms work.
+- Demonstrates limitations of DFS (e.g., may not find shortest path, may go deep unnecessarily).
+- Forms the basis for solving AI problems with state-space search.
