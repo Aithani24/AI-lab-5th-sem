@@ -31,76 +31,70 @@ Given two jugs with known capacities and a target amount of water, determine if 
 #include <bits/stdc++.h>
 using namespace std;
 
-bool waterJugBFS(int jug1Cap, int jug2Cap, int target) 
+bool solveWaterJug(int capacityA, int capacityB, int target) 
 {
-    queue<pair<int, int>> q;
-    set<pair<int, int>> visited;
+    queue<pair<int,int>> statesQueue;
+    set<pair<int,int>> visitedStates;
 
-    q.push({0, 0});
+    statesQueue.push({0, 0});
 
-    while (!q.empty()) {
-        auto curr = q.front();
-        q.pop();
+    while (!statesQueue.empty()) 
+    {
+        auto current = statesQueue.front();
+        statesQueue.pop();
 
-        cout << "Current state: (" << curr.first << ", " << curr.second << ")\n";
+        cout << "Current state: (" << current.first << ", " << current.second << ")\n";
 
-        if (curr.first == target || curr.second == target || curr.first + curr.second == target) 
+        if (current.first == target || current.second == target || current.first + current.second == target) 
         {
-            cout << "Reached target: (" << curr.first << ", " << curr.second << ")\n";
+            cout << "Reached target: (" << current.first << ", " << current.second << ")\n";
             return true;
         }
 
-        if (visited.count({curr.first, curr.second})) continue;
-        visited.insert({curr.first, curr.second});
+        if (visitedStates.count(current)) continue;
+        visitedStates.insert(current);
 
-        vector<pair<int, int>> nextStates;
+        vector<pair<int,int>> nextMoves;
 
-        nextStates.push_back({jug1Cap, curr.second});
+        nextMoves.push_back({capacityA, current.second});     
+        nextMoves.push_back({current.first, capacityB});     
+        nextMoves.push_back({0, current.second});            
+        nextMoves.push_back({current.first, 0});             
 
-        nextStates.push_back({curr.first, jug2Cap});
+        int pourToB = min(current.first, capacityB - current.second);
+        nextMoves.push_back({current.first - pourToB, current.second + pourToB});
 
-        nextStates.push_back({0, curr.second});
+        int pourToA = min(current.second, capacityA - current.first);
+        nextMoves.push_back({current.first + pourToA, current.second - pourToA});
 
-        nextStates.push_back({curr.first, 0});
-
+        for (auto &state : nextMoves) 
         {
-            int pour = min(curr.first, jug2Cap - curr.second);
-            nextStates.push_back({curr.first - pour, curr.second + pour});
-        }
-
-        {
-            int pour = min(curr.second, jug1Cap - curr.first);
-            nextStates.push_back({curr.first + pour, curr.second - pour});
-        }
-
-        for (auto &s : nextStates) 
-        {
-            if (!visited.count({s.first, s.second})) 
-            {
-                q.push(s);
-            }
+            if (!visitedStates.count(state))
+                statesQueue.push(state);
         }
     }
 
     return false;
 }
 
-int main() {
-    int jug1Cap, jug2Cap, target;
-    cout << "Enter capacity of Jug 1: ";
-    cin >> jug1Cap;
-    cout << "Enter capacity of Jug 2: ";
-    cin >> jug2Cap;
+int main() 
+{
+    int jugA, jugB, target;
+    cout << "Enter capacity of Jug A: ";
+    cin >> jugA;
+    cout << "Enter capacity of Jug B: ";
+    cin >> jugB;
     cout << "Enter target amount: ";
     cin >> target;
 
-    if (waterJugBFS(jug1Cap, jug2Cap, target))
+    if (solveWaterJug(jugA, jugB, target))
         cout << "Solution found!\n";
     else
         cout << "No solution possible!\n";
 
     return 0;
 }
+
 
 ```
 ---
