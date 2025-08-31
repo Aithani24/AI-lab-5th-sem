@@ -1,3 +1,37 @@
+# 8-Puzzle Solver using BFS
+
+## Problem Statement
+
+Solve the classic **8-puzzle problem** using **Breadth First Search (BFS)**.  
+The puzzle is represented as a 3x3 grid containing numbers `1-8` and a blank space (`0`).  
+The objective is to transform a given start state into the goal state by sliding the tiles.
+
+---
+
+## Approach
+
+- Use a **queue** to explore the state space in a level-wise manner (BFS).
+- At every state:
+  - Find the position of the empty tile.
+  - Generate all valid states by moving the tile (up, down, left, right).
+  - Enqueue each new unvisited state.
+- Stop when the goal state is found.
+
+---
+
+## Implementation Details
+
+- Each state is a `vector<vector<int>>` (3x3 matrix).
+- `std::queue` stores the current state frontier.
+- `std::set` is used to avoid revisiting states.
+- `findEmptyBox()` locates the position of the empty tile (0).
+- The directions are defined as `(dx, dy)` pairs for moving the blank tile.
+
+---
+
+## Code
+
+```cpp
 # include<bits/stdc++.h>
 using namespace std;
 
@@ -88,3 +122,24 @@ int main() {
 
     return 0;
 }
+```
+
+---
+## Time and Space Complexity
+
+### Time Complexity:
+- **Worst-case:** O(9!)  
+  - Each state is unique (up to 9! total).
+  - BFS explores each state only once.
+  - It ensures shortest path but visits many states.
+
+### Space Complexity:
+- O(9!) for the visited set and queue.
+  - Each state is stored in memory.
+
+---
+
+## Use Cases
+- Finds the shortest path to the goal (unlike DFS).
+- Good for solving problems with minimal steps required.
+- Demonstrates uninformed search algorithm in AI.
