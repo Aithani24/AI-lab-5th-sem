@@ -30,53 +30,51 @@ Given two jugs with known capacities and a target amount of water, determine whe
 #include <bits/stdc++.h>
 using namespace std;
 
-bool waterJugDFS(int jug1Cap, int jug2Cap, int target) 
+bool solveWaterJugDFS(int jugACapacity, int jugBCapacity, int targetAmount) 
 {
-    stack<pair<int, int>> st;  
-    set<pair<int, int>> visited;
+    stack<pair<int,int>> states;
+    set<pair<int,int>> visitedStates;
 
-    st.push({0, 0}); 
-    while (!st.empty()) {
-        auto curr = st.top();
-        st.pop();
+    states.push({0,0});
 
-        cout << "Current state: (" << curr.first << ", " << curr.second << ")\n";
+    while(!states.empty()) 
+    {
+        auto [jugA, jugB] = states.top();
+        states.pop();
 
-        if (curr.first == target || curr.second == target || curr.first + curr.second == target) 
+        cout << "Current state: (" << jugA << ", " << jugB << ")\n";
+
+        if (jugA == targetAmount || jugB == targetAmount || jugA + jugB == targetAmount) 
         {
-            cout << "Reached target: (" << curr.first << ", " << curr.second << ")\n";
+            cout << "Reached target: (" << jugA << ", " << jugB << ")\n";
             return true;
         }
 
-        if (visited.count({curr.first, curr.second})) continue;
-        visited.insert({curr.first, curr.second});
+        if (visitedStates.count({jugA, jugB})) continue;
+        visitedStates.insert({jugA, jugB});
 
-        vector<pair<int, int>> nextStates;
+        vector<pair<int,int>> nextMoves;
 
-        nextStates.push_back({jug1Cap, curr.second});
+        // Fill either jug completely
+        nextMoves.push_back({jugACapacity, jugB});
+        nextMoves.push_back({jugA, jugBCapacity});
 
-        nextStates.push_back({curr.first, jug2Cap});
+        // Empty either jug
+        nextMoves.push_back({0, jugB});
+        nextMoves.push_back({jugA, 0});
 
-        nextStates.push_back({0, curr.second});
+        // Pour from A to B
+        int pourToB = min(jugA, jugBCapacity - jugB);
+        nextMoves.push_back({jugA - pourToB, jugB + pourToB});
 
-        nextStates.push_back({curr.first, 0});
+        // Pour from B to A
+        int pourToA = min(jugB, jugACapacity - jugA);
+        nextMoves.push_back({jugA + pourToA, jugB - pourToA});
 
+        for (auto &move : nextMoves) 
         {
-            int pour = min(curr.first, jug2Cap - curr.second);
-            nextStates.push_back({curr.first - pour, curr.second + pour});
-        }
-
-        {
-            int pour = min(curr.second, jug1Cap - curr.first);
-            nextStates.push_back({curr.first + pour, curr.second - pour});
-        }
-
-        for (auto &s : nextStates) 
-        {
-            if (!visited.count({s.first, s.second})) 
-            {
-                st.push(s);
-            }
+            if (!visitedStates.count(move))
+                states.push(move);
         }
     }
 
@@ -85,21 +83,19 @@ bool waterJugDFS(int jug1Cap, int jug2Cap, int target)
 
 int main() 
 {
-    int jug1Cap, jug2Cap, target;
-    cout << "Enter capacity of Jug 1: ";
-    cin >> jug1Cap;
-    cout << "Enter capacity of Jug 2: ";
-    cin >> jug2Cap;
-    cout << "Enter target amount: ";
-    cin >> target;
+    int jugA, jugB, target;
+    cout << "Enter capacity of Jug A: "; cin >> jugA;
+    cout << "Enter capacity of Jug B: "; cin >> jugB;
+    cout << "Enter target amount: "; cin >> target;
 
-    if (waterJugDFS(jug1Cap, jug2Cap, target))
+    if (solveWaterJugDFS(jugA, jugB, target))
         cout << "Solution found!\n";
     else
         cout << "No solution possible!\n";
 
     return 0;
 }
+
 
 ```
 ---
