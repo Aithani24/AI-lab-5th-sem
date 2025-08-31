@@ -52,177 +52,137 @@ This project implements a **Tic-Tac-Toe game** where a human can play against an
 #include <limits>
 using namespace std;
 
-vector<int> board(10, 2); 
-int turn = 1;
-bool aiIsX;
+vector<int> board(10, 2);
+int moveCount = 1;
+bool aiPlaysX;
 
-void printBoard() 
-{
+void displayBoard() {
     cout << "\n";
-    for (int i = 1; i <= 9; ++i) 
-    {
-        char mark = (board[i] == 3) ? 'X' : (board[i] == 5) ? 'O' : ' ';
-        cout << " " << mark << " ";
+    for (int i = 1; i <= 9; ++i) {
+        char symbol = (board[i] == 3) ? 'X' : (board[i] == 5) ? 'O' : ' ';
+        cout << " " << symbol << " ";
         if (i % 3 == 0) cout << "\n";
         else cout << "|";
     }
     cout << "\n";
 }
 
-int checkWinner() 
-{
-    vector<vector<int>> lines = 
-    {
+int getWinner() {
+    vector<vector<int>> winPatterns = {
         {1,2,3}, {4,5,6}, {7,8,9},
         {1,4,7}, {2,5,8}, {3,6,9},
         {1,5,9}, {3,5,7}
     };
 
-    for (auto &line : lines) 
-    {
-        int prod = board[line[0]] * board[line[1]] * board[line[2]];
-        if (prod == 27) return 3;   
-        if (prod == 125) return 5;  
+    for (auto &line : winPatterns) {
+        int product = board[line[0]] * board[line[1]] * board[line[2]];
+        if (product == 27) return 3;   
+        if (product == 125) return 5;  
     }
     return 0;
 }
 
-bool isFull() 
-{
-    for (int i = 1; i <= 9; i++) 
-    {
+bool isBoardFull() {
+    for (int i = 1; i <= 9; i++)
         if (board[i] == 2) return false;
-    }
     return true;
 }
 
-int minimax(bool isMaximizing, int depth, int aiSymbol, int humanSymbol) 
-{
-    int winner = checkWinner();
+int minimax(bool maximizing, int depth, int aiSymbol, int humanSymbol) {
+    int winner = getWinner();
     if (winner == aiSymbol) return 10 - depth;
     if (winner == humanSymbol) return depth - 10;
-    if (isFull()) return 0;
+    if (isBoardFull()) return 0;
 
-    if (isMaximizing) {
+    if (maximizing) {
         int best = numeric_limits<int>::min();
-        for (int i = 1; i <= 9; i++) 
-        {
-            if (board[i] == 2) 
-            {
+        for (int i = 1; i <= 9; i++) {
+            if (board[i] == 2) {
                 board[i] = aiSymbol;
-                int score = minimax(false, depth + 1, aiSymbol, humanSymbol);
+                best = max(best, minimax(false, depth + 1, aiSymbol, humanSymbol));
                 board[i] = 2;
-                best = max(best, score);
             }
         }
         return best;
-    } 
-    
-    else 
-    {
+    } else {
         int best = numeric_limits<int>::max();
-        for (int i = 1; i <= 9; i++) 
-        {
-            if (board[i] == 2) 
-            {
+        for (int i = 1; i <= 9; i++) {
+            if (board[i] == 2) {
                 board[i] = humanSymbol;
-                int score = minimax(true, depth + 1, aiSymbol, humanSymbol);
+                best = min(best, minimax(true, depth + 1, aiSymbol, humanSymbol));
                 board[i] = 2;
-                best = min(best, score);
             }
         }
         return best;
     }
 }
 
-void aiMove() {
-    int aiSymbol = aiIsX ? 3 : 5;
-    int humanSymbol = aiIsX ? 5 : 3;
-    int bestScore = numeric_limits<int>::min();
-    int move = 0;
+void aiTurn() {
+    int aiSymbol = aiPlaysX ? 3 : 5;
+    int humanSymbol = aiPlaysX ? 5 : 3;
 
-    for (int i = 1; i <= 9; i++) 
-    {
-        if (board[i] == 2) 
-        {
+    int bestMove = 0, bestScore = numeric_limits<int>::min();
+
+    for (int i = 1; i <= 9; i++) {
+        if (board[i] == 2) {
             board[i] = aiSymbol;
             int score = minimax(false, 0, aiSymbol, humanSymbol);
             board[i] = 2;
-            if (score > bestScore) 
-            {
+            if (score > bestScore) {
                 bestScore = score;
-                move = i;
+                bestMove = i;
             }
         }
     }
 
-    cout << "AI chooses square " << move << "\n";
-    board[move] = aiSymbol;
-    turn++;
+    cout << "AI chooses square " << bestMove << "\n";
+    board[bestMove] = aiSymbol;
+    moveCount++;
 }
 
-void humanMove() 
-{
-    int move;
-    while (true) 
-    {
+void humanTurn() {
+    int playerMove;
+    while (true) {
         cout << "Your move (1-9): ";
-        cin >> move;
-        if (move >= 1 && move <= 9 && board[move] == 2) 
-        {
-            board[move] = (turn % 2 == 1) ? 3 : 5;
-            turn++;
+        cin >> playerMove;
+        if (playerMove >= 1 && playerMove <= 9 && board[playerMove] == 2) {
+            board[playerMove] = (moveCount % 2 == 1) ? 3 : 5;
+            moveCount++;
             break;
-        } 
-        
-        else 
-        {
+        } else {
             cout << "Invalid move. Try again.\n";
         }
     }
 }
 
-int main() 
-{
-    cout << "Welcome to Tic-Tac-Toe with Minimax!\n";
+int main() {
+    cout << "Welcome to Tic-Tac-Toe (Minimax AI)!\n";
     char choice;
     cout << "Should AI play as X and start first? (y/n): ";
     cin >> choice;
-    aiIsX = (choice == 'y' || choice == 'Y');
+    aiPlaysX = (choice == 'y' || choice == 'Y');
 
-    printBoard();
+    displayBoard();
 
-    while (turn <= 9) 
-    {
-        if ((turn % 2 == 1) == aiIsX) 
-        {
-            aiMove();
-        } 
-        
-        else 
-        {
-            humanMove();
-        }
+    while (moveCount <= 9) {
+        if ((moveCount % 2 == 1) == aiPlaysX)
+            aiTurn();
+        else
+            humanTurn();
 
-        printBoard();
+        displayBoard();
 
-        int winner = checkWinner();
-        if (winner == 3) 
-        {
-            cout << ((aiIsX) ? "AI wins!\n" : "Human wins!\n");
-            return 0;
-        }
-
-        else if (winner == 5) 
-        {
-            cout << ((!aiIsX) ? "AI wins!\n" : "Human wins!\n");
-            return 0;
-        }
+        int winner = getWinner();
+        if (winner == 3)
+            { cout << (aiPlaysX ? "AI wins!\n" : "Human wins!\n"); return 0; }
+        else if (winner == 5)
+            { cout << (!aiPlaysX ? "AI wins!\n" : "Human wins!\n"); return 0; }
     }
 
     cout << "It's a draw!\n";
     return 0;
 }
+
 
 ```
 ---
