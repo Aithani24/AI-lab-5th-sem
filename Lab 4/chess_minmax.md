@@ -54,13 +54,13 @@ This project implements a **Chess game AI** using the **Minimax algorithm**.
 ```python
 import chess
 
-def evaluate_board(board: chess.Board) -> int:
+def calculate_board_score(board: chess.Board) -> int:
     if board.is_checkmate():
         return 9999 if board.turn == chess.BLACK else -9999
     if board.is_stalemate() or board.is_insufficient_material():
         return 0
 
-    piece_values = {
+    values = {
         chess.PAWN: 1,
         chess.KNIGHT: 3,
         chess.BISHOP: 3,
@@ -69,65 +69,62 @@ def evaluate_board(board: chess.Board) -> int:
         chess.KING: 0
     }
 
-    score = 0
-    for piece_type in piece_values:
-        score += len(board.pieces(piece_type, chess.WHITE)) * piece_values[piece_type]
-        score -= len(board.pieces(piece_type, chess.BLACK)) * piece_values[piece_type]
+    total = 0
+    for piece, val in values.items():
+        total += len(board.pieces(piece, chess.WHITE)) * val
+        total -= len(board.pieces(piece, chess.BLACK)) * val
 
-    return score
+    return total
 
-
-def minimax(board: chess.Board, depth: int, maximizing: bool) -> int:
+def minimax_search(board: chess.Board, depth: int, is_maximizing: bool) -> int:
     if depth == 0 or board.is_game_over():
-        return evaluate_board(board)
+        return calculate_board_score(board)
 
-    if maximizing:
-        max_eval = -99999
-        for move in board.legal_moves:
-            board.push(move)
-            eval = minimax(board, depth - 1, False)
+    if is_maximizing:
+        best_eval = -float('inf')
+        for mv in board.legal_moves:
+            board.push(mv)
+            score = minimax_search(board, depth - 1, False)
             board.pop()
-            max_eval = max(max_eval, eval)
-        return max_eval
+            best_eval = max(best_eval, score)
+        return best_eval
     else:
-        min_eval = 99999
-        for move in board.legal_moves:
-            board.push(move)
-            eval = minimax(board, depth - 1, True)
+        best_eval = float('inf')
+        for mv in board.legal_moves:
+            board.push(mv)
+            score = minimax_search(board, depth - 1, True)
             board.pop()
-            min_eval = min(min_eval, eval)
-        return min_eval
+            best_eval = min(best_eval, score)
+        return best_eval
 
+def select_best_move(board: chess.Board, depth: int) -> chess.Move:
+    top_move = None
+    top_value = -float('inf')
 
-def find_best_move(board: chess.Board, depth: int) -> chess.Move:
-    best_move = None
-    best_value = -99999
-
-    for move in board.legal_moves:
-        board.push(move)
-        board_value = minimax(board, depth - 1, False)
+    for mv in board.legal_moves:
+        board.push(mv)
+        score = minimax_search(board, depth - 1, False)
         board.pop()
-        if board_value > best_value:
-            best_value = board_value
-            best_move = move
+        if score > top_value:
+            top_value = score
+            top_move = mv
 
-    return best_move
+    return top_move
 
-
-def play_game():
+def play_chess_game():
     board = chess.Board()
-    print("Welcome to Chess AI (Minimax)!")
-    print("Moves limited to depth search (default depth = 3).")
+    print("Welcome to Minimax Chess AI!")
+    print("Depth-limited search (default depth = 3).")
     print(board)
 
-    choice = input("Do you want to play as White and move first? (y/n): ").strip().lower()
-    user_is_white = (choice == "y")
+    choice = input("Do you want to play White and go first? (y/n): ").strip().lower()
+    user_is_white = choice == 'y'
 
     while not board.is_game_over():
         if (board.turn == chess.WHITE and user_is_white) or (board.turn == chess.BLACK and not user_is_white):
             move = None
             while move not in board.legal_moves:
-                user_input = input("Your move (UCI format, e.g. e2e4): ")
+                user_input = input("Enter your move (UCI format, e.g., e2e4): ")
                 try:
                     move = chess.Move.from_uci(user_input)
                 except:
@@ -139,16 +136,17 @@ def play_game():
             print("\nBoard after your move:")
             print(board)
         else:
-            ai_move = find_best_move(board, depth=3) 
+            ai_move = select_best_move(board, depth=3)
             board.push(ai_move)
             print(f"\nAI plays: {ai_move}")
             print(board)
 
-    print("\nGame Over:", board.result())
+    print("\nGame over! Result:", board.result())
 
 
 if __name__ == "__main__":
-    play_game()
+    play_chess_game()
+
 ```
 ---        
 
