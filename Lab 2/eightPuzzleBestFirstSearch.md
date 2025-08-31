@@ -44,110 +44,88 @@ It starts from an initial puzzle configuration and tries to reach the goal confi
 #include <bits/stdc++.h>
 using namespace std;
 
-void print_board(const vector<vector<int>>& board) 
-{
-    for (auto &row : board) 
-    {
-        for (int x : row) cout << x << " ";
+void showBoard(const vector<vector<int>>& grid) {
+    for (auto &row : grid) {
+        for (int val : row) cout << val << " ";
         cout << "\n";
     }
 }
 
-bool isGoal(const vector<vector<int>>& puzzle, const vector<vector<int>>& goal) 
-{
-    return puzzle == goal;
+bool checkGoal(const vector<vector<int>>& state, const vector<vector<int>>& target) {
+    return state == target;
 }
 
-pair<int,int> findEmptyBox(const vector<vector<int>>& puzzle) 
-{
-    for(int i=0; i<3; i++)
-        for(int j=0; j<3; j++)
-            if(puzzle[i][j] == 0)
-                return {i,j};
+pair<int,int> locateBlank(const vector<vector<int>>& grid) {
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++)
+            if (grid[r][c] == 0) return {r, c};
     return {-1,-1};
 }
 
-int misplaced_tiles(const vector<vector<int>>& puzzle, const vector<vector<int>>& goal) 
-{
-    int count = 0;
-    for(int i=0; i<3; i++) 
-    {
-        for(int j=0; j<3; j++) 
-        {
-            if (puzzle[i][j] != 0 && puzzle[i][j] != goal[i][j])
-                count++;
-        }
-    }
-    return count;
+int h_misplaced(const vector<vector<int>>& grid, const vector<vector<int>>& target) {
+    int cnt = 0;
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++)
+            if (grid[r][c] != 0 && grid[r][c] != target[r][c]) cnt++;
+    return cnt;
 }
 
-string boardToString(const vector<vector<int>>& board) 
-{
-    string s;
-    for(auto &row : board)
-        for(int x : row) s += to_string(x);
-    return s;
+string encodeBoard(const vector<vector<int>>& grid) {
+    string res;
+    for (auto &row : grid)
+        for (int val : row) res += to_string(val);
+    return res;
 }
 
-bool greedyBestFirst(vector<vector<int>> start, vector<vector<int>> goal) 
-{
-    auto cmp = [&](const vector<vector<int>>& a, const vector<vector<int>>& b) 
-    {
-        return misplaced_tiles(a, goal) > misplaced_tiles(b, goal);
+bool bestFirstSearch(vector<vector<int>> start, vector<vector<int>> target) {
+    auto cmp = [&](const vector<vector<int>>& a, const vector<vector<int>>& b) {
+        return h_misplaced(a, target) > h_misplaced(b, target);
     };
 
     priority_queue<vector<vector<int>>, vector<vector<vector<int>>>, decltype(cmp)> pq(cmp);
-    set<string> visited;
-
+    unordered_set<string> seen;
     pq.push(start);
 
-    vector<pair<int,int>> directions = {{1,0},{-1,0},{0,1},{0,-1}};
+    vector<pair<int,int>> moves = {{1,0},{-1,0},{0,1},{0,-1}};
 
-    while(!pq.empty())
-    {
-        auto current = pq.top(); pq.pop();
+    while (!pq.empty()) {
+        auto node = pq.top(); pq.pop();
 
-        if(isGoal(current, goal))
-        {
-            cout << "Solution found!\n";
-            print_board(current);
+        if (checkGoal(node, target)) {
+            cout << "Solution Found!\n";
+            showBoard(node);
             return true;
         }
 
-        string key = boardToString(current);
-        if(visited.count(key)) continue;
-        visited.insert(key);
+        string key = encodeBoard(node);
+        if (seen.count(key)) continue;
+        seen.insert(key);
 
-        auto [x,y] = findEmptyBox(current);
+        auto [r, c] = locateBlank(node);
 
-        for(auto [dx,dy] : directions)
-        {
-            int nx = x + dx, ny = y + dy;
-            if(nx>=0 && ny>=0 && nx<3 && ny<3)
-            {
-                auto new_board = current;
-                swap(new_board[x][y], new_board[nx][ny]);
-                string newKey = boardToString(new_board);
-                if(visited.count(newKey)) continue;
-                pq.push(new_board);
+        for (auto [dr, dc] : moves) {
+            int nr = r + dr, nc = c + dc;
+            if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3) {
+                auto next = node;
+                swap(next[r][c], next[nr][nc]);
+                string newKey = encodeBoard(next);
+                if (!seen.count(newKey)) pq.push(next);
             }
         }
     }
 
-    cout << "No solution found!\n";
+    cout << "No Solution Possible!\n";
     return false;
 }
 
-int main() 
-{
-    vector<vector<int>> puzzle = {{1, 2, 3}, {4, 5, 6}, {0, 7, 8}};
-    vector<vector<int>> goal = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
+int main() {
+    vector<vector<int>> start = {{1,2,3}, {4,5,6}, {0,7,8}};
+    vector<vector<int>> goal  = {{1,2,3}, {4,5,6}, {7,8,0}};
 
-    cout << "Start state:\n";
-    print_board(puzzle);
+    cout << "Initial State:\n";
+    showBoard(start);
 
-    greedyBestFirst(puzzle, goal);
-
+    bestFirstSearch(start, goal);
     return 0;
 }
 
