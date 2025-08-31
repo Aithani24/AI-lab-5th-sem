@@ -32,96 +32,82 @@ The objective is to transform a given start state into the goal state by sliding
 ## Code
 
 ```cpp
-# include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
 
-void print_board(vector<vector<int>>& board) 
-{
-    for(int i = 0; i < 3; i++)
-    {
-        for(int j = 0; j < 3; j++)
-        {
-            cout << board[i][j] << " ";
+// Print current configuration
+void displayGrid(vector<vector<int>>& grid) {
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++) {
+            cout << grid[r][c] << " ";
         }
-        cout << endl;
+        cout << "\n";
     }
+    cout << "------" << endl;
 }
 
-bool isGoal(vector<vector<int>>& puzzle, vector<vector<int>>& goal)
-{
-    for(int i = 0; i < 3; i++)
-    {
-        for(int j = 0; j < 3; j++)
-        {
-            if(puzzle[i][j] != goal[i][j]) return false;
-        }
-    }
-
-    return true;
+// Compare state with target
+bool checkGoal(vector<vector<int>>& state, vector<vector<int>>& target) {
+    return state == target;
 }
 
-void findEmptyBox(vector<vector<int>>& puzzle, int& x, int& y)
-{
-    for(int i = 0; i < 3; i++)
-    {
-        for(int j = 0; j < 3; j++)
-        {
-            if(puzzle[i][j] == 0)
-            {
-                x = i;
-                y = j;
-            }
+// Find blank (0) position
+pair<int,int> blankTile(vector<vector<int>>& state) {
+    for (int r = 0; r < 3; r++) {
+        for (int c = 0; c < 3; c++) {
+            if (state[r][c] == 0) return {r, c};
         }
     }
+    return {-1, -1};
 }
 
-bool bfs(vector<vector<int>>& puzzle, vector<vector<int>>& goal)
-{
+// Breadth First Search
+bool breadthFirst(vector<vector<int>> start, vector<vector<int>> target) {
     queue<vector<vector<int>>> q;
-    set<vector<vector<int>>> visited;
-    q.push(puzzle);
+    set<vector<vector<int>>> seen;
+    q.push(start);
 
-    while(!q.empty())
-    {
-        vector<vector<int>> curr_puzzle = q.front();
+    // possible shifts: down, up, right, left
+    vector<pair<int,int>> moves = {{1,0},{-1,0},{0,1},{0,-1}};
+
+    while (!q.empty()) {
+        auto node = q.front();
         q.pop();
 
-        if(isGoal(curr_puzzle, goal)) return true;
-        if(visited.count(curr_puzzle)) continue;
-        visited.insert(curr_puzzle);
+        if (checkGoal(node, target)) return true;
+        if (seen.count(node)) continue;
+        seen.insert(node);
 
-        int x = -1, y = -1;
-        findEmptyBox(curr_puzzle, x, y);
+        auto [bx, by] = blankTile(node);
 
-        vector<pair<int, int>> dirs = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-
-        for(auto dir: dirs)
-        {
-            int nx = x + dir.first;
-            int ny = y + dir.second;
-            if(nx >= 0 && ny >= 0 && nx < 3 && ny < 3)
-            {
-                vector<vector<int>> new_puzzle = curr_puzzle;
-                swap(new_puzzle[nx][ny], new_puzzle[x][y]);
-                if(!visited.count(new_puzzle)) q.push(new_puzzle);
+        for (auto mv : moves) {
+            int nr = bx + mv.first;
+            int nc = by + mv.second;
+            if (nr >= 0 && nr < 3 && nc >= 0 && nc < 3) {
+                auto nextState = node;
+                swap(nextState[nr][nc], nextState[bx][by]);
+                if (!seen.count(nextState)) q.push(nextState);
             }
         }
-    } 
-    
+    }
     return false;
 }
 
 int main() {
-    vector<vector<int>> puzzle = {{1, 2, 3}, {4, 5, 6}, {0, 7, 8}};
-    vector<vector<int>> goal = {{1,2, 3}, {4, 5, 6}, {7, 8, 0}};
-    cout << "Start state:" << endl;
-    print_board(puzzle);
+    vector<vector<int>> start = {{1,2,3}, {4,5,6}, {0,7,8}};
+    vector<vector<int>> goal  = {{1,2,3}, {4,5,6}, {7,8,0}};
 
-    if (bfs(puzzle, goal)) cout << "Solution found!" << endl;
-    else cout << "No solution found!" << endl;
+    cout << "Initial State:\n";
+    displayGrid(start);
+
+    if (breadthFirst(start, goal)) 
+        cout << "Solution Found!\n";
+    else 
+        cout << "No Solution Possible!\n";
 
     return 0;
 }
+
 ```
 
 ---
