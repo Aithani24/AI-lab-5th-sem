@@ -198,11 +198,10 @@ int main() {
 ---
 
 ## Time Complexity
-- **Without pruning**: O(b^d)  
-- **With Alpha-Beta pruning**: O(b^(d/2)) in best case.  
-  - b = branching factor (~9 at start).  
-  - d = depth of search (≤ 9 moves in Tic-Tac-Toe).  
-- In practice, AI always evaluates quickly because Tic-Tac-Toe is small.  
+-Without pruning: Minimax explores up to O(9!) ≈ 362,880 states.
+-**With Alpha-Beta pruning:**
+-Best case (perfect pruning) → O(b^(d/2)) ≈ O(√9!) ≈ manageable in real-time.
+-Worst case (no pruning) → O(9!), same as plain Minimax.
 
 ## Space Complexity
 - **O(d)** recursion depth.  
@@ -211,14 +210,13 @@ int main() {
 ---
 
 ## Use Cases
-- Educational tool to demonstrate Minimax and Alpha-Beta pruning.  
-- Understand game-tree search in AI.  
-- Show why Tic-Tac-Toe is a **solved game**.  
-- Extendable to larger games (e.g., Connect-4, Chess).  
+-Classic AI demonstration of Minimax + Alpha-Beta pruning.
+-Educational tool for optimization in game-tree search.
+-Shows how pruning can drastically reduce computation.  
 
 ---
 
 ## Limitations
-- Works only for **3×3 Tic-Tac-Toe**.  
-- Not scalable to large games without further optimizations.  
-- Evaluation is simple (win/lose/draw only).  
+-Still fixed to Tic-Tac-Toe (does not scale easily to larger boards).
+-Pruning efficiency depends on move order (ordering best moves first improves performance).
+-For Tic-Tac-Toe, speed difference is small (since state space is tiny), but impact is huge for larger games like Chess.
