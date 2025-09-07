@@ -11,28 +11,28 @@ This project implements a Tic-Tac-Toe game where a human can play against an AI 
 
 ## Approach
 1.**Board Representation**
--The board is stored as a vector of size 10 (index 1–9 used).
--Empty cells are represented by 2.
--X is represented by 3, O is represented by 5.
--Winning lines are detected using the product trick:
-  3 × 3 × 3 = 27 → X wins
-  5 × 5 × 5 = 125 → O wins
+  -The board is stored as a vector of size 10 (index 1–9 used).
+  -Empty cells are represented by 2.
+  -X is represented by 3, O is represented by 5.
+  -Winning lines are detected using the product trick:
+    3 × 3 × 3 = 27 → X wins
+    5 × 5 × 5 = 125 → O wins
 
 2.**Minimax with Alpha-Beta Pruning**
--Recursively evaluates possible moves until win/loss/draw.
--Alpha (α) = best value the maximizing player (AI) can guarantee so far.
--Beta (β) = best value the minimizing player (Human) can guarantee so far.
--If α ≥ β, further exploration of that branch is pruned (cut off).
--Scoring:
-  AI win = +10 - depth
-  Human win = -10 + depth
-  Draw = 0
+  -Recursively evaluates possible moves until win/loss/draw.
+  -Alpha (α) = best value the maximizing player (AI) can guarantee so far.
+  -Beta (β) = best value the minimizing player (Human) can guarantee so far.
+  -If α ≥ β, further exploration of that branch is pruned (cut off).
+  -Scoring:
+    AI win = +10 - depth
+    Human win = -10 + depth
+    Draw = 0
 
 3.**Game Loop**
--If AI’s turn, it uses Minimax with Alpha-Beta pruning to choose the best move.
--If Human’s turn, user is prompted to input a move (1–9).
--After each move, the board is printed.
--The game ends when either player wins or the board is full (draw).
+  -If AI’s turn, it uses Minimax with Alpha-Beta pruning to choose the best move.
+  -If Human’s turn, user is prompted to input a move (1–9).
+  -After each move, the board is printed.
+  -The game ends when either player wins or the board is full (draw).
 
 ---
 
